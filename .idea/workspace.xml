@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7ce0b014-1fe8-4857-82d2-f9b0b79d8907" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-    </list>
+    <list default="true" id="7ce0b014-1fe8-4857-82d2-f9b0b79d8907" name="Default" comment="" />
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -294,7 +292,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.Java" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
     <property name="nodejs_interpreter_path" value="$PROJECT_DIR$/../../../../nodejs/node" />
     <property name="settings.editor.splitter.proportion" value="0.24416342" />
     <property name="project.structure.last.edited" value="Modules" />
@@ -768,7 +766,7 @@
       <updated>1500493621926</updated>
       <workItem from="1500493627703" duration="10430000" />
       <workItem from="1500766448902" duration="2521000" />
-      <workItem from="1500847211833" duration="6498000" />
+      <workItem from="1500847211833" duration="7439000" />
     </task>
     <servers />
   </component>
@@ -790,7 +788,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="19449000" />
+    <option name="totallyTimeSpent" value="20390000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="0" />
