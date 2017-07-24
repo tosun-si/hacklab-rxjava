@@ -2,6 +2,8 @@ package io.hackages.hacklab.rxjava;
 
 import org.junit.Test;
 
+import java.util.function.Consumer;
+
 /**
  * Allows to test the operations of {@link ObservableWithCorrection} class.
  *
@@ -10,7 +12,7 @@ import org.junit.Test;
 public class ObservableWithCorrectionTest<T> {
 
     @Test
-    public void givenPeriod_whenBuildObservableWithInterval_then_expectedResult() {
+    public void givenPeriodAndObserver_whenBuildObservableWithInterval_then_expectedResult() {
 
         // Given.
         final long period = 10;
@@ -34,5 +36,17 @@ public class ObservableWithCorrectionTest<T> {
         };
 
         ObservableWithCorrection.interval(period).subscribe(observer);
+    }
+
+    @Test
+    public void givenPeriodAndOnNext_whenBuildObservableWithInterval_then_expectedResult() {
+
+        // Given.
+        final long period = 10;
+
+        // When.
+        final Consumer<Long> onNext = System.out::println;
+
+        ObservableWithCorrection.interval(period).subscribe(onNext);
     }
 }

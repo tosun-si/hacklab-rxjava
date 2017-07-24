@@ -5,6 +5,7 @@ import io.vavr.control.Try;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -21,6 +22,12 @@ import java.util.stream.LongStream;
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ObservableWithCorrection<T> {
+
+    private final Consumer<Throwable> DO_NOTHING_ON_ERROR = x -> {
+    };
+
+    private final Runnable DO_NOTHING_ON_COMPLETE = () -> {
+    };
 
     private Consumer<Observer<T>> subscriber;
 
@@ -43,6 +50,36 @@ public final class ObservableWithCorrection<T> {
     }
 
     /**
+     * Subscribes an {@link Observer} via the given implementation of on next, to the current observable.
+     *
+     * @param onNext onNext
+     */
+    public void subscribe(final Consumer<T> onNext) {
+        final Observer<T> observer = getObserver(onNext, DO_NOTHING_ON_ERROR, DO_NOTHING_ON_COMPLETE);
+        this.subscriber.accept(observer);
+    }
+
+    /**
+     * Subscribes an {@link Observer} via implementations of on next and on error, to the current observable.
+     *
+     * @param onNext onNext
+     */
+    public void subscribe(final Consumer<T> onNext, final Consumer<Throwable> onError) {
+        final Observer<T> observer = getObserver(onNext, onError, DO_NOTHING_ON_COMPLETE);
+        this.subscriber.accept(observer);
+    }
+
+    /**
+     * Subscribes an {@link Observer} via the implementations of on next, on error and on complete to the current observable.
+     *
+     * @param onNext onNext
+     */
+    public void subscribe(final Consumer<T> onNext, final Consumer<Throwable> onError, final Runnable onComplete) {
+        final Observer<T> observer = getObserver(onNext, onError, onComplete);
+        this.subscriber.accept(observer);
+    }
+
+    /**
      * Static creation operators : interval.
      * Emit numbers in sequence based on provided timeframe.
      *
@@ -50,7 +87,7 @@ public final class ObservableWithCorrection<T> {
      * @return Observable that contains the interval
      */
     public static ObservableWithCorrection<Long> interval(final long period) {
-        final Consumer<Observer<Long>> subscriber = s -> ObservableWithCorrection.buildObserverWithInterval(period, s);
+        final Consumer<Observer<Long>> subscriber = observer -> ObservableWithCorrection.buildObserverWithInterval(observer, period);
         return new ObservableWithCorrection<>(subscriber);
     }
 
@@ -62,7 +99,8 @@ public final class ObservableWithCorrection<T> {
      * @return an {@link ObservableWithCorrection} that contains generic values
      */
     public static <T> ObservableWithCorrection<T> just(final T... values) {
-        return null;
+        final Consumer<Observer<T>> subscriber = observer -> buildObserverFromValues(observer, values);
+        return new ObservableWithCorrection<>(subscriber);
     }
 
     /**
@@ -220,19 +258,61 @@ public final class ObservableWithCorrection<T> {
     }
 
     /**
+     * Gets an observer from on next, on error and on complete implementations.
+     *
+     * @param onNext     implementation of on next
+     * @param onError    implementation of on error
+     * @param onComplete implementation of on com plete
+     * @return a new {@link Observer}
+     */
+    private Observer<T> getObserver(final Consumer<? super T> onNext, final Consumer<? super Throwable> onError,
+                                    final Runnable onComplete) {
+
+        return new Observer<T>() {
+            @Override
+            public void onCompleted() {
+                onComplete.run();
+            }
+
+            @Override
+            public void onError(Throwable exception) {
+                onError.accept(exception);
+            }
+
+            @Override
+            public void onNext(T value) {
+                onNext.accept(value);
+            }
+        };
+    }
+
+    /**
      * Build an {@link Observer} with an interval.
      *
-     * @param period     period
-     * @param subscriber subscriber
+     * @param period   period
+     * @param observer observer
      */
-    private static void buildObserverWithInterval(final long period, Observer<Long> subscriber) {
+    private static void buildObserverWithInterval(final Observer<Long> observer, final long period) {
 
         final CheckedRunnable action = () -> LongStream.rangeClosed(1, period)
                 .map(ObservableWithCorrection::toIndexWithInterval)
-                .forEach(subscriber::onNext);
+                .forEach(observer::onNext);
 
-        Try.run(action).onFailure(subscriber::onError);
-        subscriber.onCompleted();
+        Try.run(action)
+                .onFailure(observer::onError)
+                .onSuccess(o -> observer.onCompleted());
+    }
+
+    /**
+     * Build an {@link Observer} from generic values.
+     *
+     * @param observer observer
+     * @param values   values
+     */
+    private static <T> void buildObserverFromValues(final Observer<T> observer, final T... values) {
+        Try.run(() -> Arrays.stream(values).forEach(observer::onNext))
+                .onFailure(observer::onError)
+                .onSuccess(o -> observer.onCompleted());
     }
 
     /**
